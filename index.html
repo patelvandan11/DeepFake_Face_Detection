@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepFake Video Detector</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://js.live.net/v7.2/OneDrive.js"></script>
+    <!-- Dropbox SDK -->
+    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="8cl21c1s4lcb2p8"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="theater-masks.png" alt="Logo Icon" class="logo-icon" width="40" height="40">
+            <pre><b> UNMASKED</b></pre>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="Aboutus.html">About Us</a></li>
+                <li><a href="#">Support</a></li>
+                <li><a href="login.html">Account</a></li>
+            </ul>
+        </nav>
+        <!-- Theme Toggle Switch -->
+        <div class="theme-toggle">
+            <label for="theme-switch">🌙 / ☀️</label>
+            <input type="checkbox" id="theme-switch">
+        </div>
+    </header>
+
+    <main>
+        <section class="converter">
+            <h1>DEEPFAKE VIDEO DETECTOR</h1>
+
+            <!-- Custom Dropdown for File Selection -->
+            <div class="file-selection-dropdown">
+                <button class="dropdown-btn">Choose Files <span>&#9660;</span></button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="uploadFromDevice()">📁 From Device</a>
+                    <a href="#" onclick="uploadFromDropbox()">
+                        <img src="dropbox.png" alt="Dropbox Icon" width="20" height="20"> From Dropbox
+                    </a>
+                    <a href="#" onclick="uploadFromGDrive()">
+                        <img src="google-drive.png" alt="Google Drive Icon" width="20" height="20"> From Google Drive
+                    </a>
+                    <a href="#" onclick="uploadFromOneDrive()">☁️ From OneDrive</a>
+                    <a href="#" onclick="enterURL()">🔗 From URL</a>
+                </div>
+            </div>
+
+            <!-- Hidden file input for uploading from device -->
+            <input type="file" id="fileInput" style="display:none;" onchange="handleDeviceUpload(event)">
+
+            <!-- Generate Report button -->
+            <button id="convertBtn" class="generate-report-btn">Generate Report</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Unmasked. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to upload from the device
+        function uploadFromDevice() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Handle file upload from the device
+        function handleDeviceUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                alert('File selected: ' + file.name);
+                // You can add code here to handle the file upload
+            }
+        }
+
+        // Dropbox Integration
+        function uploadFromDropbox() {
+            Dropbox.choose({
+                success: function(files) {
+                    alert('Dropbox file selected: ' + files[0].name);
+                    // You can handle the selected file URL here
+                },
+                linkType: "preview", // or "direct"
+                multiselect: false, // Limit to one file
+                extensions: ['.mp4', '.mov', '.avi'] // Allowed video formats
+            });
+        }
+
+        // Function to upload from Google Drive
+        function uploadFromGDrive() {
+            gapi.load('picker', function() {
+                const view = new google.picker.View(google.picker.ViewId.DOCS);
+                const picker = new google.picker.PickerBuilder()
+                    .addView(view)
+                    .setCallback(pickerCallback)
+                    .build();
+                picker.setVisible(true);
+            });
+        }
+
+        function pickerCallback(data) {
+            if (data.action === google.picker.Action.PICKED) {
+                const file = data.docs[0];
+                alert('Google Drive file selected: ' + file.name);
+                // You can handle the selected file ID here
+            }
+        }
+
+        // Function to upload from OneDrive
+        function uploadFromOneDrive() {
+            OneDrive.open({
+                clientId: "94eb28ee-ac34-4687-8ab2-c27a871d147c", // Replace with your actual OneDrive Client ID
+                action: "query",
+                multiSelect: false,
+                advanced: {
+                    filter: '.mp4,.mov,.avi'
+                },
+                success: function(files) {
+                    alert('OneDrive file selected: ' + files.value[0].name);
+                    // You can handle the selected file here
+                },
+                cancel: function() {
+                    alert('OneDrive selection canceled.');
+                }
+            });
+        }
+
+        // Function to handle URL entry
+        function enterURL() {
+            const url = prompt('Please enter the video URL:');
+            if (url) {
+                alert('URL submitted: ' + url);
+                // Handle the video URL here
+            }
+        }
+
+        // Theme Toggle Script
+        document.getElementById('theme-switch').addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode', this.checked);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeSwitch = document.getElementById('theme-switch');
+
+            // Check the saved theme preference
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeSwitch.checked = true;
+            }
+
+            // Toggle theme on checkbox change
+            themeSwitch.addEventListener('change', function () {
+                if (this.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

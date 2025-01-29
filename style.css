@@ -1,0 +1,205 @@
+/* Default Light Mode Styles */
+:root {
+    --background-color: #f4f4f4;
+    --header-background: white;
+    --header-color: black;
+    --button-background: #6c5ce7;
+    --button-hover-background: #5b4db3;
+    --report-button-background: #28a745;
+    --report-button-hover-background: #218838;
+    --footer-background: #333;
+    --footer-color: white;
+    --h1-color: black; /* Default color for h1 in light mode */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+}
+
+header {
+    background-color: var(--header-background);
+    color: var(--header-color);
+    padding: 5px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header .logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+header .main-nav {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+header .main-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+header .main-nav ul li {
+    margin-left: 20px;
+}
+
+header .main-nav ul li a {
+    color: var(--header-color);
+    text-decoration: none;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+
+/* File Selection Dropdown styling */
+.file-selection-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background-color: var(--button-background);
+    color: white;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 200px;
+}
+
+.dropdown-btn span {
+    margin-left: auto;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--button-background);
+    min-width: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--button-hover-background);
+}
+
+.file-selection-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Styling the Generate Report button */
+.generate-report-btn {
+    background-color: var(--report-button-background); /* Green background */
+    color: white;
+    padding: 12px 24px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px; /* Rounded corners */
+    cursor: pointer;
+    margin-top: 20px; /* Space below the file selection */
+}
+
+.generate-report-btn:hover {
+    background-color: var(--report-button-hover-background); /* Darker green on hover */
+}
+
+footer {
+    background-color: var(--footer-background);
+    color: var(--footer-color);
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+    color: var(--h1-color); /* Apply theme-based color */
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    --background-color: #1e1e1e;
+    --header-background: #333;
+    --header-color: #ccc;
+    --button-background: #6c5ce7;
+    --button-hover-background: #5b4db3;
+    --report-button-background: #28a745;
+    --report-button-hover-background: #218838;
+    --footer-background: #000;
+    --footer-color: #ccc;
+    --h1-color: white; /* Color for h1 in dark mode */
+}
+
+/* Theme Toggle Switch Styling */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.theme-toggle label {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.theme-toggle input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #ccc;
+    border-radius: 10px;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.theme-toggle input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    transition: transform 0.3s;
+}
+
+.theme-toggle input[type="checkbox"]:checked {
+    background-color: #4caf50;
+}
+
+.theme-toggle input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
