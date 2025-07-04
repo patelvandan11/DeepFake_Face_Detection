@@ -26,11 +26,13 @@ export default function FloatingNavbar() {
       <div className="flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center mr-8">
-          <div className="h-8 w-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center mr-3">
-            <FiCamera className="text-white text-sm" />
+          <div className="h-12 w-12 mr-2">
+            <img src="/logo.png" alt="Logo" className="h-full w-full object-cover" />
           </div>
-          <span className="text-sm font-bold text-white">Unmasked</span>
+          <span className="text-xl font-bold text-white">Unmasked</span>
         </div>
+
+
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex space-x-8">
