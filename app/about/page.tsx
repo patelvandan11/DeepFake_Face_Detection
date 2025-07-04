@@ -131,11 +131,11 @@ export default function AboutPage() {
       role: "AI Research Lead",
       bio: "Computer vision specialist with 8+ years experience in deep learning. Developed novel detection algorithms that power our core technology. Passionate about fighting digital misinformation and creating ethical AI solutions.",
       skills: ["Deep Learning", "Computer Vision", "TensorFlow", "Python", "Neural Networks"],
-      avatar: "/images/alex-avatar.jpg",
+      avatar: "vandan.jpg",
       socials: {
-        github: "alexchen",
-        linkedin: "alexchen-ai",
-        email: "alex@deepfakedetector.com"
+        github: "https://github.com/patelvandan11",
+        linkedin: "https://www.linkedin.com/in/patelvandan11/",
+        email: "vandan11patel@gmail.com"
       }
     },
     {
@@ -143,11 +143,11 @@ export default function AboutPage() {
       role: "Frontend Developer",
       bio: "Full-stack developer specializing in interactive web applications. Built our detection interface with a focus on accessibility and user experience. Believes technology should be both powerful and intuitive for everyone.",
       skills: ["React", "TypeScript", "Next.js", "UI/UX", "Accessibility"],
-      avatar: "/images/samira-avatar.jpg",
+      avatar: "yashrajsinh.jpg",
       socials: {
-        github: "samirakhan",
-        linkedin: "samira-khan-dev",
-        email: "samira@deepfakedetector.com"
+        github: "https://github.com/Fusion567",
+        linkedin: "https://www.linkedin.com/in/yashraj-parmar-3074b5252/",
+        email: "yashraj76801@gmail.com"
       },
       flipped: true
     }

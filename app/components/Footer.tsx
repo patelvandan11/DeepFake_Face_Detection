@@ -17,7 +17,7 @@ export default function Footer() {
           <div className="mb-4 md:mb-0">
             <Link href="/" className="text-xl font-bold flex items-center">
               <img 
-                src="/public/logo.png" 
+                src="./logo.png" 
                 alt="Logo" 
                 className="h-8 w-8 mr-2" 
               />
