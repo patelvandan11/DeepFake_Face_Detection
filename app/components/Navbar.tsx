@@ -22,13 +22,13 @@ export default function FloatingNavbar() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 20, opacity: 1 }}
       transition={{ type: 'spring', damping: 10 }}
-      className="fixed top-0 left-1/2 -translate-x-1/2 z-50 bg-gray-900/80 backdrop-blur-md rounded-full shadow-lg border border-gray-700/50 px-6 py-3 md:w-[1000px] lg:w-[r1200px]"
+      className="fixed top-0 left-1/2 -translate-x-1/2 z-50 bg-gray-900/80 backdrop-blur-md rounded-3xl shadow-lg border border-gray-700/50 px-6 py-3 md:w-[1000px] lg:w-[r1200px]"
     >
       <div className="flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center mr-8">
           <div className="h-12 w-12 mr-2">
-             <NextImage src="/logo.png" alt="Logo" width={48} height={48} className="h-full w-full object-cover" />
+            <NextImage src="/logo.png" alt="Logo" width={48} height={48} className="h-full w-full object-cover" />
           </div>
           <span className="text-xl font-bold text-white">Unmasked</span>
         </div>
@@ -83,7 +83,7 @@ export default function FloatingNavbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-4 space-y-2 overflow-hidden"
+            className="md:hidden mt-4 space-y-2 overflow-hidden rounded-b-none"
           >
             {navLinks.map((link) => (
               <Link href={link.path} key={`mobile-${link.name}`}>
