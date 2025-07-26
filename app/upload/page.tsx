@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiUpload, FiLink, FiCamera, FiHardDrive, FiCloud, FiInstagram, FiChevronDown, FiX, FiYoutube } from 'react-icons/fi'
+import { FiUpload, FiLink,  FiHardDrive, FiCloud, FiInstagram, FiChevronDown, FiX, FiYoutube } from 'react-icons/fi'
 import { useState, useRef, ChangeEvent } from 'react'
 
 export default function UploadPage() {
@@ -62,11 +62,14 @@ export default function UploadPage() {
       const data = await res.json()
       setResult(data.prediction) // "Real" or "Fake"
     } catch (err) {
-      clearInterval(interval)
-      setUploadProgress(100)
-      alert("Upload failed: " + (err as any).message)
+      clearInterval(interval);
+      setUploadProgress(100);
+      if (err instanceof Error) {
+        alert("Upload failed: " + err.message);
+      } else {
+        alert("An unknown upload error occurred.");
+      }
     }
-  }
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -95,32 +98,6 @@ export default function UploadPage() {
     alert(`URL entered: ${urlInput}`)
     // Add your URL processing logic here
   };
-  
-  const handleCloudFile = async (source: string, fileIdentifier: string) => {
-    setSelectedOption(source)
-    setUploadProgress(0)
-    
-    try {
-      const response = await fetch('/api/download', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          source,
-          fileIdentifier
-        }),
-      })
-
-      const data = await response.json()
-      setResult(data.prediction)
-      setUploadProgress(100)
-    } catch (error) {
-      console.error('Upload failed:', error)
-      alert(`Failed to process ${source} file`)
-    }
-  }
-
   // Update your option handler
   const handleOptionSelect = (optionName: string) => {
     switch(optionName) {
@@ -185,13 +162,7 @@ export default function UploadPage() {
                             key={option.name}
                             whileHover={{ x: 5, backgroundColor: 'rgba(30, 30, 30, 0.8)' }}
                             className={`flex items-center w-full px-4 py-3 text-left ${option.color} bg-black hover:bg-gray-900 transition-colors`}
-                            onClick={() => {
-                              if (option.name === 'Device') {
-                                fileInputRef.current?.click()
-                              }
-                              setSelectedOption(option.name)
-                              setDropdownOpen(false)
-                            }}
+                            onClick={() => handleOptionSelect(option.name)}
                           >
                             <span className="mr-3">{option.icon}</span>
                             {option.name}
