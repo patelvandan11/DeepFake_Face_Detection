@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { FiGithub, FiTwitter, FiMail } from 'react-icons/fi'
 import Link from 'next/link'
+import NextImage from 'next/image';
 
 export default function Footer() {
   return (
@@ -16,8 +17,8 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <Link href="/" className="text-xl font-bold flex items-center">
-              <img 
-                src="./logo.png" 
+              <NextImage  
+                src="/logo.png" 
                 alt="Logo" 
                 className="h-8 w-8 mr-2" 
               />
