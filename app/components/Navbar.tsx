@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useState } from 'react'
 import { FiCamera, FiHome, FiInfo, FiUpload, FiMenu, FiX } from 'react-icons/fi'
+import NextImage from 'next/image';
 
 export default function FloatingNavbar() {
   const [activeLink, setActiveLink] = useState('home')
@@ -27,7 +28,7 @@ export default function FloatingNavbar() {
         {/* Logo */}
         <div className="flex items-center mr-8">
           <div className="h-12 w-12 mr-2">
-            <img src="/logo.png" alt="Logo" className="h-full w-full object-cover" />
+             <NextImage src="/logo.png" alt="Logo" width={48} height={48} className="h-full w-full object-cover" />
           </div>
           <span className="text-xl font-bold text-white">Unmasked</span>
         </div>
