@@ -70,6 +70,7 @@ export default function UploadPage() {
         alert("An unknown upload error occurred.");
       }
     }
+  }
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
