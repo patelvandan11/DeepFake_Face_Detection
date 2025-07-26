@@ -94,7 +94,9 @@ export default function UploadPage() {
     }
     alert(`URL entered: ${urlInput}`)
     // Add your URL processing logic here
-  }const handleCloudFile = async (source: string, fileIdentifier: string) => {
+  };
+  
+  const handleCloudFile = async (source: string, fileIdentifier: string) => {
     setSelectedOption(source)
     setUploadProgress(0)
     
@@ -124,12 +126,6 @@ export default function UploadPage() {
     switch(optionName) {
       case 'Device':
         fileInputRef.current?.click()
-        break
-      case 'Google Drive':
-        handleGoogleDrive()
-        break
-      case 'OneDrive':
-        handleOneDrive()
         break
       case 'URL':
         setSelectedOption('URL')
