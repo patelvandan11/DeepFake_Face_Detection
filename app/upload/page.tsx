@@ -1,45 +1,74 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { FiUpload, FiImage } from 'react-icons/fi'
-import { useState, useCallback } from 'react'
-import NextImage from 'next/image' // Import the Next.js Image component
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiUpload, FiLink, FiCamera, FiHardDrive, FiCloud, FiInstagram, FiChevronDown, FiX, FiYoutube } from 'react-icons/fi'
+import { useState, useRef, ChangeEvent } from 'react'
 
-interface UploadAreaProps {
-  onUpload: (file: File) => Promise<void>
-  isLoading: boolean
-}
-
-export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
-  const [preview, setPreview] = useState<string | null>(null)
+export default function UploadPage() {
+  const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const [isDropdownOpen, setDropdownOpen] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [result, setResult] = useState<string | null>(null)
+  const [urlInput, setUrlInput] = useState<string>('')
+  const uploadOptions = [
+    { name: 'Device', icon: <FiHardDrive />, color: 'text-blue-400' },
+    { name: 'Google Drive', icon: <FiCloud />, color: 'text-green-400' },
+    { name: 'Instagram', icon: <FiInstagram />, color: 'text-pink-400' },
+    { name: 'YouTube', icon: <FiYoutube />, color: 'text-red-600' }, 
+    { name: 'OneDrive', icon: <FiCloud />, color: 'text-blue-500' },
+    { name: 'URL', icon: <FiLink />, color: 'text-purple-400' }
+  ]
 
-  // FIX 1: Wrap handleFile in useCallback since it's used in other hooks
-  const handleFile = useCallback(async (file: File) => {
-    if (!file.type.match('image.*|video.*')) {
-      alert('Please upload an image or video file (JPEG, PNG, WEBP, MP4, MOV)')
-      return
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      simulateUpload(e.target.files[0])
     }
+  }
 
-    if (file.size > 50 * 1024 * 1024) { // 50MB limit
-      alert('File size too large (max 50MB)')
-      return
-    }
+  const simulateUpload = async (file: File) => {
+    setSelectedOption('Device')
+    setUploadProgress(0)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(interval)
+          return 90
+        }
+        return prev + 10
+      })
+    }, 200)
 
     try {
-      const reader = new FileReader()
-      reader.onload = () => setPreview(reader.result as string)
-      reader.readAsDataURL(file)
-      await onUpload(file)
-    } catch (error) {
-      console.error('Upload failed:', error)
-      setPreview(null)
-      alert('Upload failed. Please try again.')
-    }
-  }, [onUpload]) // It depends on the onUpload prop
+      const res = await fetch("http://localhost:8000/analyze", {
+        method: "POST",
+        body: formData
+      })
 
-  // FIX 2: Add dependencies to the other hooks
-  const handleDrag = useCallback((e: React.DragEvent) => {
+      clearInterval(interval)
+      setUploadProgress(100)
+
+      if (!res.ok) {
+        const err = await res.json()
+        alert("Error: " + err.error)
+        return
+      }
+
+      const data = await res.json()
+      setResult(data.prediction) // "Real" or "Fake"
+    } catch (err) {
+      clearInterval(interval)
+      setUploadProgress(100)
+      alert("Upload failed: " + (err as any).message)
+    }
+  }
+
+  const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -47,99 +76,217 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
     } else if (e.type === 'dragleave') {
       setDragActive(false)
     }
-  }, []) // setDragActive is stable, so an empty array is okay, but [setDragActive] is technically more correct
+  }
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      await handleFile(e.dataTransfer.files[0])
+      simulateUpload(e.dataTransfer.files[0])
     }
-  }, [handleFile]) // This hook depends on handleFile
+  }
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      await handleFile(e.target.files[0])
+  const handleUrlSubmit = () => {
+    if (!urlInput) {
+      alert('Please enter a URL')
+      return
+    }
+    alert(`URL entered: ${urlInput}`)
+    // Add your URL processing logic here
+  }const handleCloudFile = async (source: string, fileIdentifier: string) => {
+    setSelectedOption(source)
+    setUploadProgress(0)
+    
+    try {
+      const response = await fetch('/api/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source,
+          fileIdentifier
+        }),
+      })
+
+      const data = await response.json()
+      setResult(data.prediction)
+      setUploadProgress(100)
+    } catch (error) {
+      console.error('Upload failed:', error)
+      alert(`Failed to process ${source} file`)
+    }
+  }
+
+  // Update your option handler
+  const handleOptionSelect = (optionName: string) => {
+    switch(optionName) {
+      case 'Device':
+        fileInputRef.current?.click()
+        break
+      case 'Google Drive':
+        handleGoogleDrive()
+        break
+      case 'OneDrive':
+        handleOneDrive()
+        break
+      case 'URL':
+        setSelectedOption('URL')
+        break
+      default:
+        setSelectedOption(optionName)
     }
   }
   
-  // ... (rest of the component is the same until the preview section)
-
   return (
-    <div className="bg-dark-200 rounded-xl p-6 shadow-lg h-full">
-        <h2 className="text-2xl font-bold mb-4">Upload Image or Video</h2>
-        <p className="text-gray-400 mb-6">Upload or drag & drop a file to analyze</p>
+    <div className="container mx-auto px-4 py-12">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-3xl mx-auto"
+      >
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
+          Upload Media
+        </h1>
+        <p className="text-gray-400 text-center mb-10 max-w-lg mx-auto">
+          Analyze videos to detect deepfake manipulation
+        </p>
 
-        <motion.label
-          htmlFor="upload-input"
-          className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-8 cursor-pointer transition-all ${
-            dragActive ? 'border-blue-500 bg-dark-300' : 'border-gray-600 hover:border-gray-500'
-          } ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+        <motion.div 
+          className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${dragActive ? 'border-blue-500 bg-dark-300' : 'border-gray-700 bg-dark-200'}`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          whileHover={!isLoading ? { scale: 1.01 } : {}}
-          whileTap={!isLoading ? { scale: 0.99 } : {}}
+          whileHover={{ scale: 1.01 }}
         >
-          <input
-            id="upload-input"
-            type="file"
-            className="hidden"
-            accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
-            onChange={handleChange}
-            disabled={isLoading}
-          />
-        
-          {preview ? (
+          {!selectedOption ? (
+            <>
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg font-medium"
+                    onClick={() => setDropdownOpen(!isDropdownOpen)}
+                  >
+                    <FiUpload className="mr-2" />
+                    Select Source
+                    <FiChevronDown className={`ml-2 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  </motion.button>
+
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute left-0 right-0 mt-2 bg-black rounded-lg shadow-xl z-10 overflow-hidden border border-gray-800"
+                      >
+                        {uploadOptions.map((option) => (
+                          <motion.button
+                            key={option.name}
+                            whileHover={{ x: 5, backgroundColor: 'rgba(30, 30, 30, 0.8)' }}
+                            className={`flex items-center w-full px-4 py-3 text-left ${option.color} bg-black hover:bg-gray-900 transition-colors`}
+                            onClick={() => {
+                              if (option.name === 'Device') {
+                                fileInputRef.current?.click()
+                              }
+                              setSelectedOption(option.name)
+                              setDropdownOpen(false)
+                            }}
+                          >
+                            <span className="mr-3">{option.icon}</span>
+                            {option.name}
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              <p className="text-gray-400 mb-4">or drag and drop video files here</p>
+              <p className="text-sm text-gray-500">Supports: MP4, AVI, MOV (Max 100MB)</p>
+            </>
+          ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="relative w-full h-64" // Parent needs to be relative for fill
+              className="space-y-6"
             >
-              {/* FIX 3: Use NextImage instead of img */}
-              <NextImage
-                src={preview}
-                alt="Preview"
-                fill
-                className="object-contain rounded-md"
-              />
-              {isLoading && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-md">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  {uploadOptions.find(o => o.name === selectedOption)?.icon}
+                  <span className="ml-2">{selectedOption}</span>
+                </div>
+                <button 
+                  onClick={() => {
+                    setSelectedOption(null)
+                    setUploadProgress(0)
+                    setResult(null)
+                    setUrlInput('')
+                  }}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <FiX />
+                </button>
+              </div>
+
+              {selectedOption === 'Device' && (
+                <div className="space-y-4">
+                  <div className="h-2.5 bg-dark-300 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${uploadProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    {uploadProgress < 100 ? 'Uploading...' : 'Analyzing...'}
+                  </p>
+                  {result && (
+                    <div className="p-4 bg-dark-400 border border-gray-700 rounded-lg">
+                      <p className="text-white font-semibold text-lg">
+                        Prediction: <span className={result === 'Fake' ? 'text-red-500' : 'text-green-400'}>{result}</span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
+
+              {(selectedOption === 'YouTube' || selectedOption === 'Instagram' || selectedOption === 'URL') && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 mt-4">
+                  <input
+                    type="text"
+                    value={urlInput}
+                    onChange={e => setUrlInput(e.target.value)}
+                    placeholder={`Paste ${selectedOption} video URL here`}
+                    className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 text-white placeholder-gray-500"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 rounded-md bg-blue-600 text-white font-medium"
+                    onClick={handleUrlSubmit}
+                  >
+                    Submit URL
+                  </motion.button>
+                </motion.div>
+              )}
             </motion.div>
-          ) : (
-            <>
-              <FiUpload className="text-4xl mb-4 text-gray-400" />
-              <p className="text-center text-gray-400 mb-2">
-                <span className="text-blue-400 font-medium">Click to upload</span> or drag and drop
-              </p>
-              <p className="text-sm text-gray-500">JPG, PNG, WEBP, MP4, MOV (Max 50MB)</p>
-            </>
           )}
-        </motion.label>
-        
-        {/* ... (rest of JSX is fine) ... */}
-        <div className="mt-6 flex flex-wrap gap-3">
-         {['selfie', 'portrait', 'group'].map((type) => (
-           <motion.button
-             key={type}
-             className={`px-4 py-2 rounded-lg text-sm flex items-center ${
-               isLoading ? 'bg-dark-400 text-gray-500' : 'bg-dark-400 text-gray-500'
-             }`}
-             whileHover={!isLoading ? { scale: 1.05 } : {}}
-             whileTap={!isLoading ? { scale: 0.95 } : {}}
-             disabled={isLoading}
-           >
-             <FiImage className="mr-2" />
-             {type.charAt(0).toUpperCase() + type.slice(1)}
-           </motion.button>
-         ))}
-       </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="video/mp4,video/x-m4v,video/*"
+            className="hidden"
+          />
+        </motion.div>
+      </motion.div>
     </div>
   )
 }
