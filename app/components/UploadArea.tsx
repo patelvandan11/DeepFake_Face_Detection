@@ -24,15 +24,6 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
     }
   }, [])
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      await handleFile(e.dataTransfer.files[0])
-    }
-  }, [])
-
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
     if (e.target.files && e.target.files[0]) {
@@ -65,6 +56,15 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
       alert('Upload failed. Please try again.')
     }
   }
+  
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      await handleFile(e.dataTransfer.files[0]);
+    }
+  }, [setDragActive, handleFile]);
 
   return (
     <div className="bg-dark-200 rounded-xl p-6 shadow-lg h-full">
