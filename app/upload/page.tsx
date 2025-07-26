@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { FiUpload, FiImage } from 'react-icons/fi'
 import { useState, useCallback } from 'react'
+import NextImage from 'next/image' // Import the Next.js Image component
 
 interface UploadAreaProps {
   onUpload: (file: File) => Promise<void>
@@ -13,6 +14,31 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [dragActive, setDragActive] = useState(false)
 
+  // FIX 1: Wrap handleFile in useCallback since it's used in other hooks
+  const handleFile = useCallback(async (file: File) => {
+    if (!file.type.match('image.*|video.*')) {
+      alert('Please upload an image or video file (JPEG, PNG, WEBP, MP4, MOV)')
+      return
+    }
+
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+      alert('File size too large (max 50MB)')
+      return
+    }
+
+    try {
+      const reader = new FileReader()
+      reader.onload = () => setPreview(reader.result as string)
+      reader.readAsDataURL(file)
+      await onUpload(file)
+    } catch (error) {
+      console.error('Upload failed:', error)
+      setPreview(null)
+      alert('Upload failed. Please try again.')
+    }
+  }, [onUpload]) // It depends on the onUpload prop
+
+  // FIX 2: Add dependencies to the other hooks
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -21,7 +47,7 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
     } else if (e.type === 'dragleave') {
       setDragActive(false)
     }
-  }, [])
+  }, []) // setDragActive is stable, so an empty array is okay, but [setDragActive] is technically more correct
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault()
@@ -30,7 +56,7 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       await handleFile(e.dataTransfer.files[0])
     }
-  }, [])
+  }, [handleFile]) // This hook depends on handleFile
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
@@ -38,103 +64,82 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
       await handleFile(e.target.files[0])
     }
   }
-
-  const handleFile = async (file: File) => {
-    if (!file.type.match('image.|video.')) {
-    alert('Please upload an image or video file (JPEG, PNG, WEBP, MP4, MOV)')
-    return
-  }
-
-    if (file.size > 50 * 1024 * 1024) { // 5MB limit
-      alert('File size too large (max 50MB)')
-      return
-    }
-
-    try {
-      // Set preview
-      const reader = new FileReader()
-      reader.onload = () => setPreview(reader.result as string)
-      reader.readAsDataURL(file)
-
-      // Process upload
-      await onUpload(file)
-    } catch (error) {
-      console.error('Upload failed:', error)
-      setPreview(null)
-      alert('Upload failed. Please try again.')
-    }
-  }
+  
+  // ... (rest of the component is the same until the preview section)
 
   return (
     <div className="bg-dark-200 rounded-xl p-6 shadow-lg h-full">
-      <h2 className="text-2xl font-bold mb-4">Upload Image</h2>
-      <p className="text-gray-400 mb-6">Upload or drag & drop an image to analyze</p>
-      
-      <motion.label
-        htmlFor="upload-input"
-        className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-8 cursor-pointer transition-all ${
-          dragActive ? 'border-blue-500 bg-dark-300' : 'border-gray-600 hover:border-gray-500'
-        } ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        whileHover={!isLoading ? { scale: 1.01 } : {}}
-        whileTap={!isLoading ? { scale: 0.99 } : {}}
-      >
-        <input
-          id="upload-input"
-          type="file"
-          className="hidden"
-          accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        
-        {preview ? (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="relative w-full h-64"
-          >
-            <img 
-              src={preview} 
-              alt="Preview" 
-              className="w-full h-full object-contain rounded-md"
-            />
-            {isLoading && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-md">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-              </div>
-            )}
-          </motion.div>
-        ) : (
-          <>
-            <FiUpload className="text-4xl mb-4 text-gray-400" />
-            <p className="text-center text-gray-400 mb-2">
-              <span className="text-blue-400 font-medium">Click to upload</span> or drag and drop
-            </p>
-            <p className="text-sm text-gray-500">JPG, PNG, WEBP, MP4, MOV (Max 50MB)</p>
-          </>
-        )}
-      </motion.label>
-      
-      <div className="mt-6 flex flex-wrap gap-3">
-        {['selfie', 'portrait', 'group'].map((type) => (
-          <motion.button
-            key={type}
-            className={`px-4 py-2 rounded-lg text-sm flex items-center ${
-              isLoading ? 'bg-dark-400 text-gray-500' : 'bg-dark-300 hover:bg-dark-400'
-            }`}
-            whileHover={!isLoading ? { scale: 1.05 } : {}}
-            whileTap={!isLoading ? { scale: 0.95 } : {}}
+        <h2 className="text-2xl font-bold mb-4">Upload Image or Video</h2>
+        <p className="text-gray-400 mb-6">Upload or drag & drop a file to analyze</p>
+
+        <motion.label
+          htmlFor="upload-input"
+          className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-8 cursor-pointer transition-all ${
+            dragActive ? 'border-blue-500 bg-dark-300' : 'border-gray-600 hover:border-gray-500'
+          } ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          whileHover={!isLoading ? { scale: 1.01 } : {}}
+          whileTap={!isLoading ? { scale: 0.99 } : {}}
+        >
+          <input
+            id="upload-input"
+            type="file"
+            className="hidden"
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+            onChange={handleChange}
             disabled={isLoading}
-          >
-            <FiImage className="mr-2" />
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </motion.button>
-        ))}
-      </div>
+          />
+        
+          {preview ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="relative w-full h-64" // Parent needs to be relative for fill
+            >
+              {/* FIX 3: Use NextImage instead of img */}
+              <NextImage
+                src={preview}
+                alt="Preview"
+                fill
+                className="object-contain rounded-md"
+              />
+              {isLoading && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-md">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              )}
+            </motion.div>
+          ) : (
+            <>
+              <FiUpload className="text-4xl mb-4 text-gray-400" />
+              <p className="text-center text-gray-400 mb-2">
+                <span className="text-blue-400 font-medium">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-sm text-gray-500">JPG, PNG, WEBP, MP4, MOV (Max 50MB)</p>
+            </>
+          )}
+        </motion.label>
+        
+        {/* ... (rest of JSX is fine) ... */}
+        <div className="mt-6 flex flex-wrap gap-3">
+         {['selfie', 'portrait', 'group'].map((type) => (
+           <motion.button
+             key={type}
+             className={`px-4 py-2 rounded-lg text-sm flex items-center ${
+               isLoading ? 'bg-dark-400 text-gray-500' : 'bg-dark-400 text-gray-500'
+             }`}
+             whileHover={!isLoading ? { scale: 1.05 } : {}}
+             whileTap={!isLoading ? { scale: 0.95 } : {}}
+             disabled={isLoading}
+           >
+             <FiImage className="mr-2" />
+             {type.charAt(0).toUpperCase() + type.slice(1)}
+           </motion.button>
+         ))}
+       </div>
     </div>
   )
 }
