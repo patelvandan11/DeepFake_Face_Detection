@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { FiUpload, FiImage } from 'react-icons/fi'
 import { useState, useCallback } from 'react'
+import NextImage from 'next/image'
 
 interface UploadAreaProps {
   onUpload: (file: File) => Promise<void>
@@ -97,10 +98,11 @@ export default function UploadArea({ onUpload, isLoading }: UploadAreaProps) {
             animate={{ opacity: 1 }}
             className="relative w-full h-64"
           >
-            <img 
-              src={preview} 
-              alt="Preview" 
-              className="w-full h-full object-contain rounded-md"
+            <NextImage
+              src={preview}
+              alt="Preview"
+              fill
+              className="object-contain rounded-md"
             />
             {isLoading && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-md">
