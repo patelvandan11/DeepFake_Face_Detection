@@ -8,7 +8,7 @@ import BlackFireCursor from './components/BlackFireCursor'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Deepfake Face Detector',
+  title: 'Unmasked',
   description: 'Detect deepfake images with AI-powered technology',
 }
 
