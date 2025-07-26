@@ -1,8 +1,6 @@
 'use client'
-
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-
 const GlitterCursor = () => {
   const [particles, setParticles] = useState<Array<{
     id: number
@@ -13,31 +11,43 @@ const GlitterCursor = () => {
     rotation: number
   }>>([])
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [isMobile, setIsMobile] = useState(false)
   const particleId = useRef(0)
   const lastPos = useRef({ x: 0, y: 0 })
+
+  // Detect mobile devices
+  useEffect(() => {
+    const checkMobile = () => {
+      // Basic check for mobile devices
+      const isTouch =
+        typeof window !== 'undefined' &&
+        ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+      setIsMobile(isTouch || window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Generate glitter particles
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const currentPos = { x: e.clientX, y: e.clientY }
     setMousePos(currentPos)
-    
     // Calculate distance moved
     const distance = Math.sqrt(
-      Math.pow(currentPos.x - lastPos.current.x, 2) + 
+      Math.pow(currentPos.x - lastPos.current.x, 2) +
       Math.pow(currentPos.y - lastPos.current.y, 2)
     )
-    
     // Add particles based on movement distance
     if (distance > 3) {
-      const newParticles = Array(Math.floor(distance/10)).fill(0).map((_, i) => ({
+      const newParticles = Array(Math.floor(distance / 10)).fill(0).map((_, i) => ({
         id: particleId.current++,
-        x: lastPos.current.x + (currentPos.x - lastPos.current.x) * (i/Math.floor(distance/10)),
-        y: lastPos.current.y + (currentPos.y - lastPos.current.y) * (i/Math.floor(distance/10)),
-        size: Math.random() * 4 + 2,  // Slightly larger particles
-        lifetime: Math.random() * 0.8 + 0.5, 
+        x: lastPos.current.x + (currentPos.x - lastPos.current.x) * (i / Math.floor(distance / 10)),
+        y: lastPos.current.y + (currentPos.y - lastPos.current.y) * (i / Math.floor(distance / 10)),
+        size: Math.random() * 4 + 2, // Slightly larger particles
+        lifetime: Math.random() * 0.8 + 0.5,
         rotation: Math.random() * 360
       }))
-      
       setParticles(prev => [...prev, ...newParticles].slice(-300))
       lastPos.current = currentPos
     }
@@ -45,6 +55,7 @@ const GlitterCursor = () => {
 
   // Update particle lifetimes
   useEffect(() => {
+    if (isMobile) return
     const interval = setInterval(() => {
       setParticles(prev => prev
         .map(p => ({ ...p, lifetime: p.lifetime - 0.02 }))
@@ -52,13 +63,16 @@ const GlitterCursor = () => {
       )
     }, 20)
     return () => clearInterval(interval)
-  }, [])
+  }, [isMobile])
 
   // Set up event listeners
   useEffect(() => {
+    if (isMobile) return
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [handleMouseMove])
+  }, [handleMouseMove, isMobile])
+
+  if (isMobile) return null
 
   return (
     <>
