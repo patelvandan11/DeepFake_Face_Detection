@@ -28,7 +28,7 @@ export default function Footer() {
           
           <div className="flex space-x-6">
             <motion.a 
-              href="https://github.com/yourusername" 
+              href="https://github.com/patelvandan11/DeepFake_Face_Detection" 
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.1 }}
@@ -38,7 +38,7 @@ export default function Footer() {
               <FiGithub className="text-2xl text-gray-400 hover:text-white transition-colors" />
             </motion.a>
             <motion.a 
-              href="https://twitter.com/yourusername" 
+              href="https://twitter.com/" 
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.1 }}
@@ -48,7 +48,7 @@ export default function Footer() {
               <FiTwitter className="text-2xl text-gray-400 hover:text-white transition-colors" />
             </motion.a>
             <motion.a 
-              href="mailto:contact@example.com"
+              href="mailto:vandan11patel@gmail.com"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               aria-label="Email"
