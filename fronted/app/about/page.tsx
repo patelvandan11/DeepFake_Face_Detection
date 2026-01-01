@@ -70,7 +70,7 @@ const TeamMember = ({
             {bio}
           </motion.p>
 
-          <div className="mt-25 md:mt-6 flex gap-3">
+          <div className="mt-25 md:mt-6 flex gap-4">
             {socials.github && (
               <motion.a
                 href={`https://github.com/${socials.github}`}
@@ -130,7 +130,7 @@ export default function AboutPage() {
       name: "Vandan Patel",
       role: "AI Research Lead",
       bio: "Computer vision specialist with 1+ years experience in deep learning. Developed novel detection algorithms that power our core technology. Passionate about fighting digital misinformation and creating ethical AI solutions.",
-      skills: ["Deep Learning", "Genrative AI", "TensorFlow", "Python", "Neural Networks"],
+      skills: ["Deep Learning", "Computer Vision", "TensorFlow", "Python", "Neural Networks"],
       avatar: "vandan.jpg",
       socials: {
         github: "patelvandan11",
