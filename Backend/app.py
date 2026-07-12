@@ -36,7 +36,14 @@ class GRUClassifier(nn.Module):
         return self.classifier(hidden[-1])
 
 model = GRUClassifier()
-model.load_state_dict(torch.load(r"D:\mini project\dfdc viva\DeepFake_Face_Detection\Backend\main_model_11.pth", map_location=device))
+
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "main_model_11.pth")
+
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+# model.load_state_dict(torch.load(r"D:\mini project\dfdc viva\DeepFake_Face_Detection\Backend\main_model_11.pth", map_location=device))
 model.to(device)
 model.eval()
 
