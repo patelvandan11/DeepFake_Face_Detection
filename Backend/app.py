@@ -83,7 +83,7 @@ async def analyze_video(file: UploadFile = File(...)):
         with torch.no_grad():
             output = model(faces)
             pred = torch.argmax(output, dim=1).item()
-            label = "Fake" if pred == 1 else "Real"
+            label = "Real" if pred == 1 else "Fake"
 
         os.remove(path)
         return JSONResponse({"prediction": label})
